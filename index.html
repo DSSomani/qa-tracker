@@ -245,10 +245,10 @@ function colorCodes(preview) {
     const t = c.textContent.trim();
     const tl = t.toLowerCase();
     c.classList.remove('status-done','status-pending','status-error');
-    if (t === 'Done')                                      c.classList.add('status-done');
-    else if (t === 'Pending')                              c.classList.add('status-pending');
+    if (tl === 'done') c.classList.add('status-done');
+    else if (tl === 'pending' || tl === 'missing') c.classList.add('status-pending');
     else if (tl.startsWith('issue') || tl.startsWith('error')) c.classList.add('status-error');
-    // else: gray (default)
+    else c.classList.add('status-gray');
   });
 }
 
