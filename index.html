@@ -145,6 +145,27 @@ code.status-error{color:#ff5c5c !important;background:#1a0a0a !important;border-
 <script>
 const cbState = {};
 let currentFilename = 'test-cases.md';
+const editor = document.getElementById('editor');
+const preview = document.getElementById('preview');
+let scrollSyncSource = null;
+
+function syncScroll(source, target) {
+  if (scrollSyncSource && scrollSyncSource !== source) return;
+  scrollSyncSource = source;
+
+  const sourceRange = source.scrollHeight - source.clientHeight;
+  const targetRange = target.scrollHeight - target.clientHeight;
+  const ratio = sourceRange > 0 ? source.scrollTop / sourceRange : 0;
+
+  target.scrollTop = targetRange > 0 ? ratio * targetRange : 0;
+
+  requestAnimationFrame(() => {
+    if (scrollSyncSource === source) scrollSyncSource = null;
+  });
+}
+
+editor.addEventListener('scroll', () => syncScroll(editor, preview));
+preview.addEventListener('scroll', () => syncScroll(preview, editor));
 
 /* ── File load via button ── */
 document.getElementById('file-input').addEventListener('change', e => {
@@ -265,8 +286,7 @@ function updateStats() {
 }
 
 function render() {
-  const md = document.getElementById('editor').value;
-  const preview = document.getElementById('preview');
+  const md = editor.value;
   preview.innerHTML = marked.parse(md);
   preview.querySelectorAll('li').forEach(processLi);
   preview.querySelectorAll('ol').forEach(ol => {
@@ -277,9 +297,10 @@ function render() {
   });
   colorCodes(preview);
   updateStats();
+  syncScroll(editor, preview);
 }
 
-document.getElementById('editor').addEventListener('input', render);
+editor.addEventListener('input', render);
 marked.setOptions({ gfm: true, breaks: false });
 render();
 </script>
