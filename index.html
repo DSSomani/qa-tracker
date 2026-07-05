@@ -22,8 +22,36 @@
     Save .md
   </button>
   <span id="filename-tag">no file loaded</span>
+  <button class="settings-btn" onclick="openSettings()" title="Configure GitHub & Jira">⚙ Integrations</button>
   <span class="env-pill qa">QA</span>
   <span class="env-pill prod">Prod</span>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div id="modal-overlay" onclick="if(event.target===this)closeSettings()">
+  <div id="modal">
+    <div id="modal-header">
+      <h2>⚙ Integration Settings</h2>
+      <button id="modal-close" onclick="closeSettings()">×</button>
+    </div>
+    <div id="modal-body">
+      <div class="modal-section">
+        <div class="modal-section-title gh">◆ GitHub Issues</div>
+        <div class="field-row"><label>Repository Owner (username or org)</label><input id="gh-owner" placeholder="e.g. acme-corp"></div>
+        <div class="field-row"><label>Repository Name</label><input id="gh-repo" placeholder="e.g. my-project"></div>
+        <div class="field-row"><label>Personal Access Token (needs Issues: read/write scope)</label><input id="gh-token" type="password" placeholder="ghp_xxxxxxxxxxxx"></div>
+      </div>
+      <hr class="modal-divider">
+      <div class="modal-section">
+        <div class="modal-section-title jira">◆ Jira</div>
+        <div class="field-row"><label>Jira Domain</label><input id="jira-domain" placeholder="e.g. yourcompany (from yourcompany.atlassian.net)"></div>
+        <div class="field-row"><label>Email</label><input id="jira-email" placeholder="you@company.com"></div>
+        <div class="field-row"><label>API Token</label><input id="jira-token" type="password" placeholder="Your Jira API token"></div>
+        <div class="field-row"><label>Project Key</label><input id="jira-project" placeholder="e.g. QA or PROJ"></div>
+      </div>
+      <button class="modal-save" onclick="saveSettings()">Save Settings</button>
+    </div>
+  </div>
 </div>
 
 <div id="main">
