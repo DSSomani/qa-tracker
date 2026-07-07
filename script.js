@@ -74,6 +74,73 @@ function getKey(li) {
   return t.trim().slice(0, 90);
 }
 
+function normalizeMatchText(text) {
+  return text
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/^[ \t]*([*+-]|\d+\.)\s*/,'')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+function isStatusCode(code) {
+  const t = code.trim().toLowerCase();
+  return t === 'done' || t === 'pending' || t === 'missing'
+    || t.startsWith('issue') || t.startsWith('error')
+    || t === 'prod-done' || t === 'proddone' || t === 'prod done' || t === 'pd';
+}
+
+function getAutoCheckState(li) {
+  const codes = Array.from(li.querySelectorAll('code')).map(c => c.textContent.trim().toLowerCase());
+  return {
+    qa: codes.includes('done'),
+    prod: codes.includes('proddone') || codes.includes('prod done') || codes.includes('prod-done') || codes.includes('pdone') || codes.includes('pd')
+  };
+}
+
+function findMarkdownLineIndex(key) {
+  const lines = editor.value.split('\n');
+  const normalizedKey = normalizeMatchText(key);
+  return lines.findIndex(line => {
+    const normalizedLine = normalizeMatchText(line);
+    return normalizedLine === normalizedKey || normalizedLine.startsWith(normalizedKey + ' ');
+  });
+}
+
+function syncLineStatus(key, env, checked) {
+  const lines = editor.value.split('\n');
+  const lineIndex = findMarkdownLineIndex(key);
+  if (lineIndex === -1) return;
+
+  const line = lines[lineIndex];
+  const tokens = [...line.matchAll(/`([^`]+)`/g)].map(m => m[1]);
+  const statusTokens = tokens.filter(code => isStatusCode(code));
+  const envVariants = env === 'qa'
+    ? ['done']
+    : ['prod-done', 'proddone', 'prod done', 'pdone', 'pd'];
+
+  const remainingStatusTokens = statusTokens.filter(code => {
+    const lower = code.trim().toLowerCase();
+    return !envVariants.includes(lower);
+  });
+
+  if (checked) {
+    remainingStatusTokens.push(env === 'qa' ? 'Done' : 'prod-done');
+  }
+
+  const base = line
+    .replace(/`([^`]+)`/g, (match, code) => isStatusCode(code) ? '' : match)
+    .replace(/\s*[-–—]\s*$/,'')
+    .replace(/\s{2,}/g,' ')
+    .trimEnd();
+
+  const builtLine = remainingStatusTokens.length
+    ? base.replace(/\s+$/,'') + ' - ' + remainingStatusTokens.map(code => `\`${code.trim()}\``).join(' ')
+    : base;
+
+  lines[lineIndex] = builtLine;
+  editor.value = lines.join('\n');
+}
+
 function makeCbBtn(key, env) {
   const btn = document.createElement('label');
   btn.className = 'cb-btn ' + env;
@@ -86,7 +153,8 @@ function makeCbBtn(key, env) {
     if (!cbState[key]) cbState[key] = {};
     cbState[key][env] = inp.checked;
     btn.classList.toggle('on', inp.checked);
-    updateStats();
+    syncLineStatus(key, env, inp.checked);
+    render();
   });
   btn.appendChild(inp);
   btn.appendChild(document.createTextNode(env === 'qa' ? 'QA' : 'PROD'));
@@ -96,6 +164,11 @@ function makeCbBtn(key, env) {
 function processLi(li) {
   const key = getKey(li);
   if (!key) return;
+  const autoState = getAutoCheckState(li);
+  if (!cbState[key]) cbState[key] = {};
+  if (autoState.qa) cbState[key].qa = true;
+  if (autoState.prod) cbState[key].prod = true;
+
   const inline = [], nested = [];
   for (const n of [...li.childNodes]) {
     (n.tagName === 'UL' || n.tagName === 'OL') ? nested.push(n) : inline.push(n);
@@ -121,7 +194,7 @@ function colorCodes(preview) {
     const t = c.textContent.trim();
     const tl = t.toLowerCase();
     c.classList.remove('status-done','status-pending','status-error');
-    if (tl === 'done') c.classList.add('status-done');
+    if (tl === 'done' || tl === 'prod-done') c.classList.add('status-done');
     else if (tl === 'pending' || tl === 'missing') c.classList.add('status-pending');
     else if (tl.startsWith('issue') || tl.startsWith('error')) c.classList.add('status-error');
     else c.classList.add('status-gray');
@@ -149,6 +222,7 @@ function updateStats() {
 }
 
 function render() {
+  Object.keys(cbState).forEach(key => delete cbState[key]);
   const md = editor.value;
   preview.innerHTML = marked.parse(md);
   preview.querySelectorAll('li').forEach(processLi);
