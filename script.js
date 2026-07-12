@@ -2,7 +2,49 @@ const cbState = {};
 let currentFilename = 'test-cases.md';
 const editor = document.getElementById('editor');
 const preview = document.getElementById('preview');
+const fullscreenButtons = document.querySelectorAll('.fullscreen-toggle');
+const fullscreenTargetPanes = ['editor-pane', 'preview-pane'];
+const fullscreenExpandIcon = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1 6V1h5v1H2v4H1zm9-5h5v5h-1V2h-4V1zM1 10h1v4h4v1H1v-5zm13 0h1v5h-5v-1h4v-4z"/></svg>';
+const fullscreenCollapseIcon = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 1v1H2v3H1V1h4zm10 0v4h-1V2h-3V1h4zM5 14v1H1v-4h1v3h3zm10-3v4h-4v-1h3v-3h1z"/></svg>';
+let activeFullscreenPane = null;
 let scrollSyncSource = null;
+
+function updateFullscreenButtons() {
+  fullscreenButtons.forEach(btn => {
+    const pane = btn.dataset.pane;
+    const isActive = pane === activeFullscreenPane;
+    btn.classList.toggle('active', isActive);
+    btn.setAttribute('aria-pressed', String(isActive));
+    btn.title = isActive ? 'Exit fullscreen' : 'Enter fullscreen';
+    btn.setAttribute('aria-label', btn.title);
+    btn.innerHTML = isActive ? fullscreenCollapseIcon : fullscreenExpandIcon;
+  });
+}
+
+function setFullscreenPane(paneId) {
+  activeFullscreenPane = paneId;
+  fullscreenTargetPanes.forEach(id => {
+    const pane = document.getElementById(id);
+    if (!pane) return;
+    pane.classList.toggle('is-fullscreen', id === paneId);
+  });
+  updateFullscreenButtons();
+}
+
+fullscreenButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const paneId = btn.dataset.pane;
+    setFullscreenPane(activeFullscreenPane === paneId ? null : paneId);
+  });
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && activeFullscreenPane) {
+    setFullscreenPane(null);
+  }
+});
+
+updateFullscreenButtons();
 
 function syncScroll(source, target) {
   if (scrollSyncSource && scrollSyncSource !== source) return;
