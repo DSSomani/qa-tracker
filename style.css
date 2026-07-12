@@ -28,11 +28,16 @@ body{font-family:'IBM Plex Sans',sans-serif;background:#0e1016;color:#c8cdd6;hei
 
 #filename-tag{font-size:10px;color:#3a4460;font-style:italic;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
-#main{display:flex;flex:1;overflow:hidden;}
+#main{display:flex;flex:1;overflow:hidden;position:relative;}
 
 /* EDITOR */
 #editor-pane{width:44%;border-right:1px solid #1e2330;display:flex;flex-direction:column;position:relative;}
-.pane-bar{padding:7px 14px;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#444c60;background:#13161f;border-bottom:1px solid #1e2330;flex-shrink:0;}
+.pane-bar{padding:7px 10px 7px 14px;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#444c60;background:#13161f;border-bottom:1px solid #1e2330;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.pane-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pane-action-btn{width:28px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid #242c3e;background:#1a1f2d;color:#8e9ab2;cursor:pointer;transition:all .15s;flex-shrink:0;}
+.pane-action-btn:hover{background:#20283a;color:#d5dcef;border-color:#36415a;}
+.pane-action-btn.active{background:#152846;color:#7aa8ff;border-color:#2d5da5;}
+.pane-action-btn svg{width:14px;height:14px;fill:currentColor;}
 #editor{flex:1;background:#0b0d14;color:#9ea8b8;border:none;outline:none;padding:16px 18px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.8;resize:none;tab-size:2;}
 #editor::placeholder{color:#2a3040;}
 
@@ -44,6 +49,15 @@ body{font-family:'IBM Plex Sans',sans-serif;background:#0e1016;color:#c8cdd6;hei
 
 /* PREVIEW */
 #preview-pane{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+#editor-pane.is-fullscreen,
+#preview-pane.is-fullscreen{
+  position:absolute;
+  inset:0;
+  width:100% !important;
+  border-right:none;
+  z-index:120;
+  background:#0e1016;
+}
 #preview{flex:1;overflow-y:auto;padding:16px 20px;}
 #preview::-webkit-scrollbar{width:5px;}
 #preview::-webkit-scrollbar-track{background:#0e1016;}
