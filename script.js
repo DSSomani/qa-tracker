@@ -483,3 +483,158 @@ function addIssueBtn(li, key, title) {
 }
 
 render();
+
+/* ════════════════════════════════════════
+   FIND & REPLACE
+   ════════════════════════════════════════ */
+const frState = {
+  matches: [],   // [{start, end}]
+  current: -1,
+  opts: { case: false, word: false }
+};
+
+function toggleFR() {
+  const panel = document.getElementById('fr-panel');
+  const btn   = document.getElementById('fr-toggle-btn');
+  const isOpen = panel.classList.toggle('open');
+  btn.classList.toggle('active', isOpen);
+  if (isOpen) {
+    document.getElementById('fr-find').focus();
+    frSearch();
+  } else {
+    frClear();
+  }
+}
+
+function closeFR() {
+  document.getElementById('fr-panel').classList.remove('open');
+  document.getElementById('fr-toggle-btn').classList.remove('active');
+  frClear();
+}
+
+function frToggleOpt(opt) {
+  frState.opts[opt] = !frState.opts[opt];
+  document.getElementById('fr-' + opt).classList.toggle('on', frState.opts[opt]);
+  frSearch();
+}
+
+/* Build regex from find input */
+function frBuildRegex(term) {
+  if (!term) return null;
+  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = frState.opts.word ? `\\b${escaped}\\b` : escaped;
+  const flags   = frState.opts.case ? 'g' : 'gi';
+  try { return new RegExp(pattern, flags); } catch { return null; }
+}
+
+/* Find all matches, jump to current */
+function frSearch() {
+  const term = document.getElementById('fr-find').value;
+  const countEl = document.getElementById('fr-count');
+  frState.matches = [];
+  frState.current = -1;
+
+  if (!term) { countEl.textContent = '–'; countEl.className = 'fr-count'; return; }
+
+  const rx = frBuildRegex(term);
+  if (!rx) return;
+
+  const text = editor.value;
+  let m;
+  while ((m = rx.exec(text)) !== null) {
+    frState.matches.push({ start: m.index, end: m.index + m[0].length });
+    if (frState.matches.length > 5000) break; // safety cap
+  }
+
+  if (frState.matches.length === 0) {
+    countEl.textContent = 'no match';
+    countEl.className = 'fr-count no-match';
+    return;
+  }
+
+  // Jump to first match at or after cursor
+  const cursor = editor.selectionStart;
+  frState.current = frState.matches.findIndex(m => m.start >= cursor);
+  if (frState.current === -1) frState.current = 0;
+  frJumpTo(frState.current);
+}
+
+function frJumpTo(idx, focusEditor = false) {
+  const countEl = document.getElementById('fr-count');
+  if (!frState.matches.length) return;
+  frState.current = (idx + frState.matches.length) % frState.matches.length;
+  const { start, end } = frState.matches[frState.current];
+  if (focusEditor) editor.focus();
+  editor.setSelectionRange(start, end);
+  // Scroll editor so match is visible
+  const lineH = parseInt(getComputedStyle(editor).lineHeight) || 20;
+  const linesBefore = editor.value.slice(0, start).split('\n').length - 1;
+  editor.scrollTop = Math.max(0, linesBefore * lineH - editor.clientHeight / 2);
+  countEl.innerHTML = `<b>${frState.current + 1}</b>/${frState.matches.length}`;
+  countEl.className = 'fr-count has-match';
+}
+
+function frNext() { frJumpTo(frState.current + 1, true); }
+function frPrev() { frJumpTo(frState.current - 1, true); }
+
+function frReplace() {
+  if (!frState.matches.length || frState.current === -1) return;
+  const replacement = document.getElementById('fr-replace').value;
+  const { start, end } = frState.matches[frState.current];
+  const val = editor.value;
+  editor.value = val.slice(0, start) + replacement + val.slice(end);
+  // Move cursor after replacement
+  editor.setSelectionRange(start + replacement.length, start + replacement.length);
+  render();
+  // Re-search and jump to next
+  frSearch();
+}
+
+function frReplaceAll() {
+  const term = document.getElementById('fr-find').value;
+  const replacement = document.getElementById('fr-replace').value;
+  if (!term) return;
+  const rx = frBuildRegex(term);
+  if (!rx) return;
+  const before = editor.value;
+  const after  = before.replace(rx, replacement);
+  const count  = (before.match(rx) || []).length;
+  editor.value = after;
+  render();
+  frSearch();
+  // Show brief confirmation in count
+  const countEl = document.getElementById('fr-count');
+  countEl.innerHTML = `✓ ${count} replaced`;
+  countEl.className = 'fr-count has-match';
+}
+
+function frClear() {
+  frState.matches = [];
+  frState.current = -1;
+  document.getElementById('fr-count').textContent = '–';
+  document.getElementById('fr-count').className = 'fr-count';
+}
+
+/* Live search as user types in find box */
+document.getElementById('fr-find').addEventListener('input', frSearch);
+document.getElementById('fr-replace').addEventListener('keydown', e => {
+  if (e.key === 'Enter') frReplace();
+});
+document.getElementById('fr-find').addEventListener('keydown', e => {
+  if (e.key === 'Enter') e.shiftKey ? frPrev() : frNext();
+  if (e.key === 'Escape') closeFR();
+});
+
+/* Keyboard shortcut: Ctrl+H / Cmd+H */
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'h') {
+    e.preventDefault();
+    toggleFR();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+    e.preventDefault();
+    const panel = document.getElementById('fr-panel');
+    if (!panel.classList.contains('open')) toggleFR();
+    else document.getElementById('fr-find').focus();
+  }
+});

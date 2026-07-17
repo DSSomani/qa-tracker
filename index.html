@@ -58,12 +58,36 @@
   <div id="editor-pane">
     <div class="pane-bar">
       <span class="pane-title">✎ &nbsp;Markdown Editor — drag &amp; drop .md file here</span>
+      <button class="pane-action-btn" id="fr-toggle-btn" onclick="toggleFR()" title="Find & Replace (Ctrl+H)" aria-label="Find & Replace">
+        <svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11"/></svg>
+      </button>
       <button class="pane-action-btn fullscreen-toggle" data-pane="editor-pane" title="Enter fullscreen" aria-label="Enter fullscreen" aria-pressed="false">
         <svg viewBox="0 0 16 16" aria-hidden="true">
           <path d="M1 6V1h5v1H2v4H1zm9-5h5v5h-1V2h-4V1zM1 10h1v4h4v1H1v-5zm13 0h1v5h-5v-1h4v-4z" />
         </svg>
       </button>
     </div>
+
+    <!-- FIND & REPLACE PANEL -->
+    <div id="fr-panel">
+      <div class="fr-row">
+        <span class="fr-label">Find</span>
+        <input class="fr-input" id="fr-find" placeholder="Search in editor…" autocomplete="off" spellcheck="false">
+        <button class="fr-toggle" id="fr-case" title="Case sensitive" onclick="frToggleOpt('case')">Aa</button>
+        <button class="fr-toggle" id="fr-word" title="Whole word" onclick="frToggleOpt('word')">W</button>
+        <button class="fr-btn" onclick="frPrev()">↑</button>
+        <button class="fr-btn" onclick="frNext()">↓</button>
+        <span class="fr-count" id="fr-count">–</span>
+        <button class="fr-close" onclick="closeFR()">×</button>
+      </div>
+      <div class="fr-row">
+        <span class="fr-label">Replace</span>
+        <input class="fr-input" id="fr-replace" placeholder="Replace with…" autocomplete="off" spellcheck="false">
+        <button class="fr-btn primary" onclick="frReplace()">Replace</button>
+        <button class="fr-btn primary" onclick="frReplaceAll()">Replace All</button>
+      </div>
+    </div>
+
     <textarea id="editor" spellcheck="false" placeholder="Paste your markdown here, or use 'Load .md File' button above, or drag & drop a .md file onto this panel..."></textarea>
     <div id="drop-overlay">
       <p>⬇ Drop your .md file</p>

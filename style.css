@@ -190,3 +190,38 @@ code.status-error{color:#ff5c5c !important;background:#1a0a0a !important;border-
 .pop-status.ok{display:block;background:#0a1f13;color:#3fb97a;border:1px solid #0d3320;}
 .pop-status.err{display:block;background:#1a0a0a;color:#ff5c5c;border:1px solid #3d1010;}
 .pop-status.loading{display:block;background:#0d1f3c;color:#4c8eff;border:1px solid #1a3a7a;}
+
+/* ── FIND & REPLACE PANEL ── */
+#fr-panel{
+  display:none;position:absolute;top:0;left:0;right:0;z-index:150;
+  background:#13161f;border-bottom:2px solid #2e3550;
+  padding:8px 12px;flex-direction:column;gap:6px;
+  box-shadow:0 4px 16px #00000066;
+}
+#fr-panel.open{display:flex;}
+
+.fr-row{display:flex;align-items:center;gap:6px;}
+.fr-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#3a4460;width:46px;flex-shrink:0;text-align:right;}
+.fr-input{flex:1;background:#0b0d14;border:1px solid #1e2330;border-radius:3px;color:#c8cdd6;font-size:11.5px;padding:4px 8px;outline:none;font-family:'IBM Plex Mono',monospace;}
+.fr-input:focus{border-color:#2e4a7a;}
+.fr-input::placeholder{color:#2a3040;}
+
+.fr-toggle{padding:3px 7px;border-radius:3px;border:1px solid #1e2330;background:#1a1e2b;color:#3a4460;font-size:9.5px;font-weight:700;cursor:pointer;transition:all .12s;letter-spacing:.05em;}
+.fr-toggle:hover{color:#7a8499;border-color:#2e3550;}
+.fr-toggle.on{background:#0d1f3c;color:#4c8eff;border-color:#1a3a7a;}
+
+.fr-btn{padding:3px 9px;border-radius:3px;border:1px solid #1e2330;background:#1a1e2b;color:#7a8499;font-size:10px;font-weight:600;cursor:pointer;transition:all .12s;font-family:'IBM Plex Sans',sans-serif;white-space:nowrap;}
+.fr-btn:hover{background:#1e2435;color:#c8cdd6;border-color:#2e3550;}
+.fr-btn.primary{background:#1a2a4a;border-color:#1a3a7a;color:#4c8eff;}
+.fr-btn.primary:hover{background:#1f3a5f;}
+.fr-btn:disabled{opacity:.3;cursor:not-allowed;}
+
+.fr-count{font-size:10px;color:#3a4460;white-space:nowrap;min-width:40px;text-align:center;}
+.fr-count.has-match{color:#7a8499;}
+.fr-count.no-match{color:#7a2a2a;}
+
+.fr-close{margin-left:auto;background:none;border:none;color:#3a4460;cursor:pointer;font-size:16px;line-height:1;padding:0 2px;}
+.fr-close:hover{color:#c8cdd6;}
+
+/* highlight current match in find count */
+.fr-count b{color:#4c8eff;}
