@@ -81,32 +81,6 @@ body{font-family:'IBM Plex Sans',sans-serif;background:#0e1016;color:#c8cdd6;hei
 #preview li>.li-content>ul,
 #preview li>.li-content>ol{margin-top:3px;padding-left:14px;}
 
-/* NOTES (blockquotes nested under a test case li) */
-#preview li blockquote{
-  margin:5px 0 2px;
-  padding:4px 9px;
-  border-left:2px solid #3d3010;
-  background:#0d0f16;
-  border-radius:0 3px 3px 0;
-}
-#preview li blockquote p{
-  font-size:11px;
-  color:#8a7a4a;
-  font-style:italic;
-  line-height:1.5;
-  margin:0;
-}
-#preview li blockquote p::before{
-  content:'Note — ';
-  font-style:normal;
-  font-weight:700;
-  letter-spacing:.06em;
-  text-transform:uppercase;
-  font-size:9px;
-  color:#e3a847;
-  margin-right:2px;
-}
-
 /* CHECKBOXES */
 .cb-btn{display:flex;align-items:center;gap:2px;padding:1px 6px 1px 4px;border-radius:2px;cursor:pointer;font-size:8.5px;font-weight:700;letter-spacing:.1em;border:1px solid transparent;transition:all .12s;user-select:none;line-height:1.6;}
 .cb-btn input{width:10px;height:10px;cursor:pointer;margin:0;flex-shrink:0;}
